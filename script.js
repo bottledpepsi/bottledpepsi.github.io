@@ -111,4 +111,19 @@ async function init() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+function initThemeToggle() {
+  const toggle = document.getElementById('theme-toggle');
+  
+  toggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  initThemeToggle();
+});
