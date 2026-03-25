@@ -18,6 +18,39 @@ const languageColors = {
   default: '#8b949e'
 };
 
+const projects = [
+  { repo: "minecraft-external-esp", url: "https://github.com/bottledpepsi/minecraft-external-esp/" },
+  { repo: "cps-tester", url: "https://bottledpepsi.github.io/cps-tester/" },
+  { repo: "nvidia-clicker-game", url: "https://bottledpepsi.github.io/nvidia-clicker-game/" },
+  { repo: "hi", url: "https://bottledpepsi.github.io/hi/" }
+];
+
+
+
+const grid = document.getElementById('projects-grid');
+
+// 1. Generate the skeletons immediately
+grid.innerHTML = projects.map(p => `
+  <div class="project-card skeleton" data-repo="${p.repo}" data-url="${p.url}"> 
+    <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project-header">
+        <h3 class="project-name skeleton-text">Loading...</h3>
+        <svg class="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+        </svg>
+      </div>
+      <p class="project-description skeleton-text">Fetching description...</p>
+      <div class="project-meta">
+        <span class="meta-item skeleton-text">--</span>
+        <span class="meta-item skeleton-text">--</span>
+      </div>
+    </a>
+  </div>
+`).join('');
+
+// 2. GitHub API fetching logic...
+// Loop through 'projects' and update the innerHTML of the cards created above.
+
 async function fetchRepoData(repoName) {
   try {
     const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repoName}`, {
@@ -58,7 +91,7 @@ function renderProjectCard(card, data) {
 
   card.classList.remove('skeleton');
   card.classList.add('loaded');
-  
+
   const handleClick = () => window.open(url, '_blank', 'noopener,noreferrer');
   card.onclick = handleClick;
   card.onkeydown = (e) => {
@@ -131,7 +164,7 @@ function renderError(card) {
 
   card.classList.remove('skeleton');
   card.classList.add('loaded');
-  
+
   const handleClick = () => window.open(url, '_blank', 'noopener,noreferrer');
   card.onclick = handleClick;
   card.onkeydown = (e) => {
