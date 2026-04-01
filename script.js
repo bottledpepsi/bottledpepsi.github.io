@@ -1,4 +1,4 @@
-const GITHUB_USERNAME = 'bottledpepsi';
+const GITHUB_USERNAME = "bottledpepsi";
 
 const languageColors = {
   JavaScript: '#f1e05a',
@@ -18,60 +18,44 @@ const languageColors = {
   default: '#8b949e'
 };
 
-const projects = [
-  { repo: "minecraft-external-esp", url: "https://github.com/bottledpepsi/minecraft-external-esp/" },
-  { repo: "cps-tester", url: "https://bottledpepsi.github.io/cps-tester/" },
-  { repo: "nvidia-clicker-game", url: "https://bottledpepsi.github.io/nvidia-clicker-game/" },
-  { repo: "hi", url: "https://bottledpepsi.github.io/hi/" }
+const projectNames = [
+  "golden-dandelion-indicator",
+  "reverse-aging-mod",
+  "perfhud",
+  "minecraft-external-esp",
+  "cps-tester",
+  "nvidia-clicker-game"
 ];
-
-
 
 const grid = document.getElementById('projects-grid');
 
-// 1. Generate the skeletons immediately
-grid.innerHTML = projects.map(p => `
-  <div class="project-card skeleton" data-repo="${p.repo}" data-url="${p.url}"> 
-    <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="project-link">
-      <div class="project-header">
-        <h3 class="project-name skeleton-text">Loading...</h3>
-        <svg class="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
-        </svg>
-      </div>
-      <p class="project-description skeleton-text">Fetching description...</p>
-      <div class="project-meta">
-        <span class="meta-item skeleton-text">--</span>
-        <span class="meta-item skeleton-text">--</span>
-      </div>
-    </a>
-  </div>
-`).join('');
-
-// 2. GitHub API fetching logic...
-// Loop through 'projects' and update the innerHTML of the cards created above.
-
 async function fetchRepoData(repoName) {
   try {
-    const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repoName}`, {
+    const response = await fetch(`https://github.com/${GITHUB_USERNAME}/${repoName}`, {
       headers: {
         'Accept': 'application/vnd.github.v3+json'
       }
     });
+
+    if (response.status === 403) {
+      return { name: repoName, rateLimited: true };
+    }
+
     if (!response.ok) throw new Error('Failed to fetch');
     return await response.json();
   } catch (error) {
     console.error(`Error fetching ${repoName}:`, error);
-    return null;
+    return { name: repoName, error: true };
   }
 }
 
 function formatDate(dateString) {
+  if (!dateString) return '';
   const date = new Date(dateString);
   const now = new Date();
   const diffTime = Math.abs(now - date);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 0) return 'today';
   if (diffDays === 1) return 'yesterday';
   if (diffDays < 7) return `${diffDays}d ago`;
@@ -109,6 +93,13 @@ function renderProjectCard(card, data) {
   name.textContent = data.name;
 
   description.classList.remove('skeleton-text');
+
+  if (data.rateLimited || data.error) {
+    description.textContent = data.rateLimited ? "API rate limit reached. Details hidden" : "Failed to load details";
+    meta.innerHTML = `<span class="meta-item" style="color: #8b949e;">API Rate-limit</span>`;
+    return;
+  }
+
   description.textContent = data.description || 'No description available';
 
   const langColor = languageColors[data.language] || languageColors.default;
@@ -158,55 +149,49 @@ function renderProjectCard(card, data) {
   meta.innerHTML = metaItems.join('');
 }
 
-function renderError(card) {
-  const repoName = card.dataset.repo;
-  const url = card.dataset.url;
-
-  card.classList.remove('skeleton');
-  card.classList.add('loaded');
-
-  const handleClick = () => window.open(url, '_blank', 'noopener,noreferrer');
-  card.onclick = handleClick;
-  card.onkeydown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleClick();
-    }
-  };
-
-  const name = card.querySelector('.project-name');
-  const description = card.querySelector('.project-description');
-  const meta = card.querySelector('.project-meta');
-
-  name.classList.remove('skeleton-text');
-  name.textContent = repoName;
-
-  description.classList.remove('skeleton-text');
-  description.textContent = 'Click to view project';
-
-  meta.innerHTML = '';
-}
-
 async function init() {
-  const projectCards = document.querySelectorAll('.project-card');
-  
-  // Fetch all repos in parallel for better performance
-  const fetchPromises = Array.from(projectCards).map(card => {
-    const repoName = card.dataset.repo;
-    return fetchRepoData(repoName).then(data => ({ card, data }));
-  });
+  grid.innerHTML = projectNames.map(() => `
+    <div class="project-card skeleton"> 
+      <div class="project-header">
+        <h3 class="project-name skeleton-text">Loading...</h3>
+      </div>
+      <p class="project-description skeleton-text">Fetching...</p>
+      <div class="project-meta"><span class="meta-item skeleton-text">--</span></div>
+    </div>
+  `).join('');
 
-  const results = await Promise.all(fetchPromises);
-  
-  // Render with staggered animation
-  results.forEach(({ card, data }, index) => {
-    setTimeout(() => {
-      if (data) {
-        renderProjectCard(card, data);
-      } else {
-        renderError(card);
-      }
-    }, index * 100);
+  const results = await Promise.all(projectNames.map(name => fetchRepoData(name)));
+
+  const sortedProjects = results
+      .filter(data => data !== null)
+      .sort((a, b) => {
+        if (a.rateLimited || b.rateLimited) return 0;
+        return new Date(b.updated_at) - new Date(a.updated_at);
+      });
+
+  grid.innerHTML = '';
+
+  sortedProjects.forEach((data, index) => {
+    const card = document.createElement('div');
+    card.className = 'project-card skeleton';
+    card.dataset.repo = data.name;
+    card.dataset.url = `https://github.com/${GITHUB_USERNAME}/${data.name}/`;
+
+    card.innerHTML = `
+      <a href="${card.dataset.url}" target="_blank" rel="noopener noreferrer" class="project-link">
+        <div class="project-header">
+          <h3 class="project-name skeleton-text">Loading...</h3>
+          <svg class="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+          </svg>
+        </div>
+        <p class="project-description skeleton-text">Fetching...</p>
+        <div class="project-meta"></div>
+      </a>
+    `;
+
+    grid.appendChild(card);
+    setTimeout(() => renderProjectCard(card, data), index * 100);
   });
 }
 
@@ -220,15 +205,13 @@ function initThemeToggle() {
 
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
-    // Update theme-color meta tag
+
     if (metaThemeColor) {
       metaThemeColor.content = newTheme === 'dark' ? '#0d1117' : '#ffffff';
     }
   });
 }
 
-// Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   init();
   initThemeToggle();
