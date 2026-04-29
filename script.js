@@ -8,7 +8,6 @@ const PROJECT_NAMES = [
   'golden-dandelion-indicator',
   'reverse-aging-mod',
   'perfhud',
-  'minecraft-external-esp',
   'cps-tester',
   'nvidia-clicker-game',
 ];
