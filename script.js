@@ -167,20 +167,7 @@ function renderProjectCard(card, data) {
   card.classList.remove('skeleton');
   card.classList.add('loaded');
   card.removeAttribute('aria-busy');
-
-  // Make the whole card keyboard-navigable like a link.
-  card.setAttribute('role', 'link');
-  card.setAttribute('tabindex', '0');
   card.setAttribute('aria-label', `${data.name} repository`);
-
-  const openRepo = () => window.open(repoUrl, '_blank', 'noopener,noreferrer');
-  card.addEventListener('click', openRepo);
-  card.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openRepo();
-    }
-  });
 
   const nameEl        = card.querySelector('.project-name');
   const descriptionEl = card.querySelector('.project-description');
@@ -269,6 +256,8 @@ async function initProjects() {
   sorted.forEach((data, index) => {
     const card = document.createElement('article');
     card.className = 'project-card skeleton';
+    card.setAttribute('role', 'link');
+    card.setAttribute('tabindex', '0');
     card.setAttribute('aria-busy', 'true');
     card.setAttribute('aria-label', 'Loading project');
     card.dataset.url = `https://github.com/${GITHUB_USERNAME}/${data.name}/`;
@@ -287,6 +276,17 @@ async function initProjects() {
     `;
 
     grid.appendChild(card);
+
+    // Attach interaction handlers immediately so the card is usable
+    // via keyboard even while still in skeleton/loading state.
+    const openRepo = () => window.open(card.dataset.url, '_blank', 'noopener,noreferrer');
+    card.addEventListener('click', openRepo);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openRepo();
+      }
+    });
 
     // Stagger the load animation slightly to avoid layout thrash.
     setTimeout(() => renderProjectCard(card, data), index * 50);
