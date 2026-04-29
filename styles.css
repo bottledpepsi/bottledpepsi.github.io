@@ -543,3 +543,27 @@ html[data-theme="light"] .icon-moon {
   background: var(--accent-soft);
   color: var(--text);
 }
+
+/* ── Skip link (accessibility) ─────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 9999;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ── Project card role="link" cursor fix ────────────────────────────────────── */
+.project-card[role="link"] {
+  cursor: pointer;
+}
