@@ -10,6 +10,7 @@ const PROJECT_NAMES = [
   'perfhud',
   'cps-tester',
   'nvidia-clicker-game',
+  'Python-Chess',
 ];
 
 const LANGUAGE_COLORS = {
