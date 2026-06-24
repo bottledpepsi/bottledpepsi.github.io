@@ -1,0 +1,18 @@
+/* ==========================================================================
+   responsive.css — small-screen tweaks
+   ========================================================================== */
+
+@media (max-width: 480px) {
+  .container {
+    padding: 4rem 1rem 2rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .link-card,
+  .project-card {
+    padding: 1rem;
+  }
+}

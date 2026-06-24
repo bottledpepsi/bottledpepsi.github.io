@@ -1,0 +1,53 @@
+/* ==========================================================================
+   variables.css — design tokens & theme palettes
+   --------------------------------------------------------------------------
+   All colours live here as CSS custom properties. Two palettes are defined:
+     • :root / [data-theme="dark"]   — GitHub dark (default)
+     • [data-theme="light"]          — GitHub light
+   Switching `data-theme` on <html> swaps every token at once; the smooth
+   cross-fade is produced by the `transition` declarations in components.css
+   and base.css (NOT by JavaScript).
+   ========================================================================== */
+
+:root,
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #161b22;
+  --bg-card-hover: #1f2937;
+  --text: #f0f6fc;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-soft: rgba(88, 166, 255, 0.15);
+  --border: #30363d;
+  --border-hover: #484f58;
+  --star: #e3b341;
+  --github: #6e40c9;
+  --x: #1d9bf0;
+  --success: #3fb950;
+  --glow: rgba(88, 166, 255, 0.4);
+
+  /* Shared transition curve/duration reused across components.
+     Centralising it here keeps the theme cross-fade consistent. */
+  --theme-duration: 0.4s;
+  --theme-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --interact-duration: 0.25s;
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f6f8fa;
+  --text: #1f2328;
+  --text-muted: #656d76;
+  --accent: #0969da;
+  --accent-soft: rgba(9, 105, 218, 0.1);
+  --border: #d0d7de;
+  --border-hover: #afb8c1;
+  --star: #bf8700;
+  --github: #8250df;
+  --x: #1d9bf0;
+  --success: #1a7f37;
+  --glow: rgba(9, 105, 218, 0.3);
+}
